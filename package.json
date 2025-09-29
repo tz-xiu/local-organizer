@@ -1,0 +1,42 @@
+{
+  "name": "local-organizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/cli.js",
+  "bin": {
+    "local-organizer": "bin/local-organizer"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "echo \"No tests yet\"",
+    "dev": "node src/cli.js --folder .",
+    "build:web": "vite build",
+    "preview:web": "vite preview --port 5173"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tz-xiu/local-organizer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tz-xiu/local-organizer/issues"
+  },
+  "homepage": "https://github.com/tz-xiu/local-organizer#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "js-yaml": "^4.1.0",
+    "minimist": "^1.2.8",
+    "nanoid": "^5.1.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vite": "^7.1.7"
+  }
+}
