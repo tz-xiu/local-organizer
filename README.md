@@ -13,6 +13,10 @@ npm install local-organizer
 ```bash
 # Start dashboard and point to your folder containing task markdown files
 npx local-organizer --folder ./path/to/tasks
+ 
+# Stop the running server gracefully (SIGTERM), or force kill on timeout
+npx local-organizer stop
+npx local-organizer stop --force
 ```
 
 - The server listens on `http://localhost:6749`.

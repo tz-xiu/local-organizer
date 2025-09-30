@@ -91,10 +91,31 @@ function startServer({ dataFolder, port }) {
     return res.sendFile(path.join(publicDir, 'index.html'));
   });
 
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`Local Organizer listening on http://localhost:${port}`);
     console.log(`Data folder: ${path.resolve(dataFolder)}`);
   });
+
+  function shutdown(signal) {
+    console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+    server.close((err) => {
+      if (err) {
+        console.error('Error during server close:', err);
+        process.exit(1);
+      }
+      process.exit(0);
+    });
+    // Fallback: force exit if close hangs
+    setTimeout(() => {
+      console.warn('Force exiting after timeout.');
+      process.exit(1);
+    }, 5000).unref();
+  }
+
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
+
+  return server;
 }
 
 module.exports = { startServer };
