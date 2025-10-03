@@ -6,6 +6,14 @@
   "bin": {
     "local-organizer": "bin/local-organizer"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "dist/",
+    "templates/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18"
   },
@@ -30,6 +38,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "js-yaml": "^4.1.0",
+    "marked": "^16.3.0",
     "minimist": "^1.2.8",
     "nanoid": "^5.1.6"
   },

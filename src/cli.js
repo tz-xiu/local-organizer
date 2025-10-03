@@ -3,11 +3,92 @@ const os = require('os');
 const path = require('path');
 const minimist = require('minimist');
 const { startServer } = require('./server');
+const { STATUS_TO_FILE } = require('./data');
 
 function resolveFolder(inputFolder) {
   if (!inputFolder) return process.cwd();
   if (path.isAbsolute(inputFolder)) return inputFolder;
   return path.resolve(process.cwd(), inputFolder);
+}
+
+function getConfigPath() {
+  return path.join(process.cwd(), 'local-organizer.config.json');
+}
+
+function loadConfig() {
+  const configPath = getConfigPath();
+  if (!fs.existsSync(configPath)) {
+    return null;
+  }
+  try {
+    const content = fs.readFileSync(configPath, 'utf8');
+    return JSON.parse(content);
+  } catch (err) {
+    console.error('Error reading config file:', err.message);
+    return null;
+  }
+}
+
+function initProject() {
+  const cwd = process.cwd();
+  const configPath = getConfigPath();
+  
+  // Check if config already exists
+  if (fs.existsSync(configPath)) {
+    console.log('Config file already exists at:', configPath);
+    console.log('Initialization skipped.');
+    return;
+  }
+
+  const tasksFolder = path.join(cwd, 'local-task');
+  const docsFolder = path.join(cwd, 'local-docs');
+
+  // Create local-task folder and files
+  console.log('Creating local-task folder...');
+  fs.mkdirSync(tasksFolder, { recursive: true });
+  
+  const taskFiles = Object.values(STATUS_TO_FILE);
+  taskFiles.forEach((filename) => {
+    const filePath = path.join(tasksFolder, filename);
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, '', 'utf8');
+      console.log(`  Created: ${filename}`);
+    }
+  });
+
+  // Create local-docs folder and copy template files
+  console.log('Creating local-docs folder...');
+  fs.mkdirSync(docsFolder, { recursive: true });
+
+  // Copy template files to local-docs
+  const templatesDir = path.join(__dirname, '..', 'templates');
+  const templateFiles = ['definitions.md', 'generate.md'];
+  
+  templateFiles.forEach((filename) => {
+    const templatePath = path.join(templatesDir, filename);
+    const targetPath = path.join(docsFolder, filename);
+    
+    if (fs.existsSync(templatePath)) {
+      try {
+        fs.copyFileSync(templatePath, targetPath);
+        console.log(`  Copied: ${filename}`);
+      } catch (err) {
+        console.warn(`  Warning: Could not copy ${filename}:`, err.message);
+      }
+    }
+  });
+
+  // Create config file
+  const config = {
+    tasksFolder: './local-task',
+    docsFolder: './local-docs'
+  };
+  
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+  console.log('\nCreated config file:', configPath);
+  console.log('\nInitialization complete!');
+  console.log('\nTo start the dashboard, run:');
+  console.log('  npx local-organizer start');
 }
 
 function getConfigDir() {
@@ -115,14 +196,30 @@ async function main() {
   const argv = minimist(process.argv.slice(2));
   const subcmd = argv._ && argv._[0];
 
+  if (subcmd === 'init') {
+    initProject();
+    return;
+  }
+
   if (subcmd === 'stop') {
     const code = await stopServer({ force: Boolean(argv.force) || Boolean(argv.f) });
     process.exitCode = code;
     return;
   }
 
-  const folderArg = argv.folder || argv.f;
-  const dataFolder = resolveFolder(folderArg);
+  // For start command (or default), require config file
+  const config = loadConfig();
+  if (!config) {
+    console.error('Error: No config file found.');
+    console.error('Please run "npx local-organizer init" first to initialize your project.');
+    process.exitCode = 1;
+    return;
+  }
+
+  // Resolve paths from config (relative to cwd)
+  const cwd = process.cwd();
+  const tasksFolder = path.resolve(cwd, config.tasksFolder);
+  const docsFolder = path.resolve(cwd, config.docsFolder);
   const port = 6749; // fixed per requirement
 
   const existingPid = readPidFromFile();
@@ -132,7 +229,7 @@ async function main() {
     return;
   }
 
-  const server = startServer({ dataFolder, port });
+  const server = startServer({ tasksFolder, docsFolder, port });
 
   // Record PID and setup cleanup
   writePidFile(process.pid);
