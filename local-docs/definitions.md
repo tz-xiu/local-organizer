@@ -50,3 +50,11 @@ one-page.md
 - file structure
 - naming convention
 - coding convension
+
+
+# testing
+## doc name
+testing.md
+## content
+- existing testing strategy (testing pyrimid)
+- testing tools
