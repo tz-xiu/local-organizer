@@ -183,9 +183,13 @@ button:active { transform: translateY(1px); }
 
 .task-list { list-style: none; padding: 0; margin: 0; }
 .task-item {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 10px; justify-content: space-between;
   padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
 }
+.task-item:hover { background: rgba(110, 168, 254, 0.08); }
+.task-item:hover .task-title { text-decoration: underline; text-decoration-color: rgba(110,168,254,0.8); }
+.task-item button { width: 80px; }
 .task-title { font-weight: 600; }
 
 .modal-backdrop {
@@ -199,7 +203,7 @@ button:active { transform: translateY(1px); }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   min-width: 420px;
-  max-width: 92vw;
+  width: min(90vw, 800px);
   padding: 18px;
   display: grid; gap: 10px;
   box-shadow: var(--shadow);

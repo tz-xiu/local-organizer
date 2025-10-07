@@ -1,4 +1,5 @@
 {
   "tasksFolder": "./demo-tasks",
-  "docsFolder": "./demo-docs"
+  "docsFolder": "./demo-docs",
+  "port": 6749
 }

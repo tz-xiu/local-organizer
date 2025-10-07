@@ -11,6 +11,17 @@ function resolveFolder(inputFolder) {
   return path.resolve(process.cwd(), inputFolder);
 }
 
+function validatePort(port) {
+  const portNum = Number(port);
+  if (!Number.isInteger(portNum)) {
+    return { valid: false, error: 'Port must be a valid integer' };
+  }
+  if (portNum < 1024 || portNum > 65535) {
+    return { valid: false, error: 'Port must be between 1024 and 65535' };
+  }
+  return { valid: true };
+}
+
 function getConfigPath() {
   return path.join(process.cwd(), 'local-organizer.config.json');
 }
@@ -81,7 +92,8 @@ function initProject() {
   // Create config file
   const config = {
     tasksFolder: './local-task',
-    docsFolder: './local-docs'
+    docsFolder: './local-docs',
+    port: 6749
   };
   
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
@@ -220,7 +232,16 @@ async function main() {
   const cwd = process.cwd();
   const tasksFolder = path.resolve(cwd, config.tasksFolder);
   const docsFolder = path.resolve(cwd, config.docsFolder);
-  const port = 6749; // fixed per requirement
+  
+  // Read and validate port from config
+  const port = config.port !== undefined ? config.port : 6749;
+  const portValidation = validatePort(port);
+  if (!portValidation.valid) {
+    console.error(`Error: Invalid port configuration. ${portValidation.error}`);
+    console.error(`Please update the port in your config file (${getConfigPath()}).`);
+    process.exitCode = 1;
+    return;
+  }
 
   const existingPid = readPidFromFile();
   if (existingPid && isProcessRunning(existingPid)) {

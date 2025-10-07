@@ -3,7 +3,7 @@ import { marked } from 'marked'
 
 const STATUSES = ['backlog', 'in-progress', 'complete', 'archived']
 
-function Group({ title, tasks, onEdit, onDelete }) {
+function Group({ title, tasks, onEdit, onComplete, onStart, onDelete, onArchive }) {
   const label = title === 'in-progress' ? 'In Progress' : (title.charAt(0).toUpperCase() + title.slice(1))
   return (
     <div className="card">
@@ -16,12 +16,25 @@ function Group({ title, tasks, onEdit, onDelete }) {
       ) : (
         <ul className="task-list">
           {tasks.map((t, idx) => (
-            <li key={`${t.title}:${idx}`} className="task-item">
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => onEdit({ ...t, _index: idx, _status: title.toLowerCase() })} className="button-secondary">Edit</button>
-                <button onClick={() => onDelete({ ...t, _index: idx, _status: title.toLowerCase() })} className="button-danger">Delete</button>
-              </div>
+            <li
+              key={`${t.title}:${idx}`}
+              className="task-item"
+              title="Click to edit"
+              onClick={() => onEdit({ ...t, _index: idx, _status: title.toLowerCase() })}
+            >
               <div className="task-title">{t.title}</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {title !== 'complete' && title !== 'archived' && (
+                  <button onClick={(e) => { e.stopPropagation(); onComplete({ ...t, _index: idx, _status: title.toLowerCase() }) }} className="button-secondary">Complete</button>
+                )}
+                {title === 'backlog' && (
+                  <button onClick={(e) => { e.stopPropagation(); onStart({ ...t, _index: idx, _status: title.toLowerCase() }) }} className="button-secondary">Start</button>
+                )}
+                {title !== 'archived' && (
+                  <button onClick={(e) => { e.stopPropagation(); onArchive({ ...t, _index: idx, _status: title.toLowerCase() }) }} className="button-secondary">Archive</button>
+                )}
+                <button onClick={(e) => { e.stopPropagation(); onDelete({ ...t, _index: idx, _status: title.toLowerCase() }) }} className="button-danger">Delete</button>
+              </div>
             </li>
           ))}
         </ul>
@@ -114,6 +127,27 @@ export function App() {
     await load()
   }
 
+  async function completeTask(task) {
+    if (typeof task?._index !== 'number' || !task?._status) return
+    const updates = { title: task.title, parentTitle: task.parentTitle || null, description: task.description || '', status: 'complete' }
+    await fetch(`/api/tasks/${task._status}/${task._index}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) })
+    await load()
+  }
+
+  async function startTask(task) {
+    if (typeof task?._index !== 'number' || !task?._status) return
+    const updates = { title: task.title, parentTitle: task.parentTitle || null, description: task.description || '', status: 'in-progress' }
+    await fetch(`/api/tasks/${task._status}/${task._index}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) })
+    await load()
+  }
+
+  async function archiveTask(task) {
+    if (typeof task?._index !== 'number' || !task?._status) return
+    const updates = { title: task.title, parentTitle: task.parentTitle || null, description: task.description || '', status: 'archived' }
+    await fetch(`/api/tasks/${task._status}/${task._index}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) })
+    await load()
+  }
+
   async function deleteTask(task) {
     if (typeof task?._index !== 'number' || !task?._status) return
     // Try DELETE first; if not supported, fall back to POST /delete endpoint
@@ -170,10 +204,10 @@ export function App() {
 
       {activeTab === 'tasks' && (
         <div className="grid">
-          <Group title="backlog" tasks={grouped['backlog']} onEdit={setEditing} onDelete={requestDelete} />
-          <Group title="in-progress" tasks={grouped['in-progress']} onEdit={setEditing} onDelete={requestDelete} />
-          <Group title="complete" tasks={grouped['complete']} onEdit={setEditing} onDelete={requestDelete} />
-          <Group title="archived" tasks={grouped['archived']} onEdit={setEditing} onDelete={requestDelete} />
+          <Group title="backlog" tasks={grouped['backlog']} onEdit={setEditing} onComplete={completeTask} onStart={startTask} onDelete={requestDelete} onArchive={archiveTask} />
+          <Group title="in-progress" tasks={grouped['in-progress']} onEdit={setEditing} onComplete={completeTask} onStart={startTask} onDelete={requestDelete} onArchive={archiveTask} />
+          <Group title="complete" tasks={grouped['complete']} onEdit={setEditing} onComplete={completeTask} onStart={startTask} onDelete={requestDelete} onArchive={archiveTask} />
+          <Group title="archived" tasks={grouped['archived']} onEdit={setEditing} onComplete={completeTask} onStart={startTask} onDelete={requestDelete} onArchive={archiveTask} />
         </div>
       )}
 
@@ -230,7 +264,7 @@ export function App() {
             </div>
             <div className="form-field">
               <label>Description:</label>
-              <textarea name="description" placeholder="Description" rows={6} />
+              <textarea name="description" placeholder="Description" rows={12} />
             </div>
             <div className="modal-actions">
               <button type="button" className="button-secondary" onClick={() => setShowNew(false)}>Cancel</button>
@@ -260,7 +294,7 @@ export function App() {
             </div>
             <div className="form-field">
               <label>Description:</label>
-              <textarea name="description" defaultValue={editing.description} rows={6} />
+              <textarea name="description" defaultValue={editing.description} rows={12} />
             </div>
             <div className="modal-actions">
               <button type="button" className="button-secondary" onClick={() => setEditing(null)}>Cancel</button>

@@ -51,16 +51,17 @@ npx local-organizer stop --force
 
 ## Configuration
 
-The `local-organizer.config.json` file defines paths:
+The `local-organizer.config.json` file defines paths and port:
 
 ```json
 {
   "tasksFolder": "./local-task",
-  "docsFolder": "./local-docs"
+  "docsFolder": "./local-docs",
+  "port": 6749
 }
 ```
 
-You can customize these paths to point to existing folders.
+You can customize these paths to point to existing folders. The default port is 6749.
 
 ## Data Source
 
