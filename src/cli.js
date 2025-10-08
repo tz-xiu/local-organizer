@@ -44,11 +44,18 @@ function initProject() {
   const cwd = process.cwd();
   const configPath = getConfigPath();
   
-  // Check if config already exists
+  // If config exists, keep a backup and continue to overwrite
   if (fs.existsSync(configPath)) {
-    console.log('Config file already exists at:', configPath);
-    console.log('Initialization skipped.');
-    return;
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const backupPath = `${configPath}.bak.${timestamp}`;
+      fs.copyFileSync(configPath, backupPath);
+      console.log('Existing config detected. Backed up previous config to:', backupPath);
+      console.log('Overwriting config file...');
+    } catch (err) {
+      console.warn('Warning: Failed to back up existing config:', err.message);
+      console.log('Proceeding to overwrite config file...');
+    }
   }
 
   const tasksFolder = path.join(cwd, 'local-task');
@@ -71,7 +78,7 @@ function initProject() {
   console.log('Creating local-docs folder...');
   fs.mkdirSync(docsFolder, { recursive: true });
 
-  // Copy template files to local-docs
+  // Copy template files to local-docs (do not overwrite existing files)
   const templatesDir = path.join(__dirname, '..', 'templates');
   const templateFiles = ['definitions.md', 'generate.md'];
   
@@ -81,8 +88,12 @@ function initProject() {
     
     if (fs.existsSync(templatePath)) {
       try {
-        fs.copyFileSync(templatePath, targetPath);
-        console.log(`  Copied: ${filename}`);
+        if (!fs.existsSync(targetPath)) {
+          fs.copyFileSync(templatePath, targetPath);
+          console.log(`  Copied: ${filename}`);
+        } else {
+          console.log(`  Exists, skipped: ${filename}`);
+        }
       } catch (err) {
         console.warn(`  Warning: Could not copy ${filename}:`, err.message);
       }
@@ -97,7 +108,7 @@ function initProject() {
   };
   
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-  console.log('\nCreated config file:', configPath);
+  console.log('\nWrote config file:', configPath);
   console.log('\nInitialization complete!');
   console.log('\nTo start the dashboard, run:');
   console.log('  npx local-organizer start');

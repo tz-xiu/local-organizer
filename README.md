@@ -21,6 +21,11 @@ npm install local-organizer
 npx local-organizer init
 ```
 
+Behavior:
+- If `local-organizer.config.json` already exists, it will be overwritten.
+- A backup of the previous file will be saved as `local-organizer.config.json.bak.<timestamp>`.
+- The operation is non-interactive (no prompt) and logs a message indicating the backup and overwrite.
+
 This creates:
 - `local-task/` folder with task markdown files
 - 4 tasks markdown files are created in `local-task` folder.
