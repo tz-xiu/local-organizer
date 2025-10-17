@@ -6,7 +6,7 @@
 ## doc name
 one-page.md
 ## content
-- simply introduction of this project
+- Purpose of this project
 - how can this project be used (used as api, or web, desktop application, library, etc...)
 - core functionalities
 
@@ -14,8 +14,8 @@ one-page.md
 ## doc name
 architecture.md
 ## content
-- C2 of C4 model: Container Diagram 
-- C3 of C4 model: Component Diagram
+- C2 of C4 model: Container Diagram (in mermaid diagram syntax `C4Container`)
+- C3 of C4 model: Component Diagram (in mermaid diagram syntax `C4Component`)
 
 # tech-stack
 ## doc name

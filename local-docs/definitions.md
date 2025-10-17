@@ -6,20 +6,20 @@
 ## doc name
 one-page.md
 ## content
-- simply introduction of this project
+- Purpose of this project
 - how can this project be used (used as api, or web, desktop application, library, etc...)
 - core functionalities
 
 # architecture
 ## doc name
-one-page.md
+architecture.md
 ## content
-- C2 of C4 model: Container Diagram 
-- C3 of C4 model: Component Diagram
+- C2 of C4 model: Container Diagram (in mermaid diagram syntax `C4Container`)
+- C3 of C4 model: Component Diagram (in mermaid diagram syntax `C4Component`)
 
 # tech-stack
 ## doc name
-one-page.md
+tech-stack.md
 ## content
 - lanuage
 - core framework
@@ -28,7 +28,7 @@ one-page.md
 
 # build-deploy
 ## doc name
-one-page.md
+build-deploy.md
 ## content
 - pipeline setup (if applied)
 - how to build in different environment
@@ -38,23 +38,16 @@ one-page.md
 
 # testing
 ## doc name
-one-page.md
+testing.md
 ## content
 - test strategy
 - test coverage
 
 # code-style
 ## doc name
-one-page.md
+code-style.md
 ## content
 - file structure
 - naming convention
 - coding convension
 
-
-# testing
-## doc name
-testing.md
-## content
-- existing testing strategy (testing pyrimid)
-- testing tools
